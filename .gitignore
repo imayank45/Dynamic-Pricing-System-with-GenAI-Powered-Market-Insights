@@ -174,4 +174,5 @@ cython_debug/
 .pypirc
 
 /secrets.txt
-config/
+# Ignore sensitive config
+config/config.yaml
