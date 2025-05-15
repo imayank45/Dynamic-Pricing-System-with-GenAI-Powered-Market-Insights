@@ -6,7 +6,7 @@ from src.utils.logger import setup_logger
 import time
 
 # Load environment variables from .env file
-load_dotenv()
+load_dotenv() 
 
 def ingest_data(config_path: str) -> None:
     """Ingest retail data into Delta table."""
