@@ -176,3 +176,8 @@ cython_debug/
 /secrets.txt
 # Ignore sensitive config
 config/config.yaml
+config/
+.config
+config\config.yaml
+C:\ds_projects\Dynamic-Pricing-System-with-GenAI-Powered-Market-Insights\config
+
