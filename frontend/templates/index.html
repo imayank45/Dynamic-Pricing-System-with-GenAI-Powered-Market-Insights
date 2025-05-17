@@ -5,11 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dynamic Pricing Dashboard</title>
     <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>Dynamic Pricing Dashboard</h1>
-        <form method="POST">
+        <header class="header">
+            <h1>Dynamic Pricing Dashboard</h1>
+            <p>Optimize your pricing strategy with AI-driven insights</p>
+        </header>
+        
+        <form method="POST" id="pricing-form">
             <div class="form-group">
                 <label for="product_id">Product ID</label>
                 <input type="text" id="product_id" name="product_id" required>
@@ -50,22 +55,85 @@
                 <label for="lag_price">Previous Price ($)</label>
                 <input type="number" step="0.01" id="lag_price" name="lag_price" required>
             </div>
-            <button type="submit">Predict Price</button>
+            <button type="submit" id="submit-btn">
+                <span class="btn-text">Predict Price</span>
+                <span class="spinner hidden"></span>
+            </button>
         </form>
         
         {% if result %}
-        <div class="result">
-            <h2>Results</h2>
-            <p><strong>Recommended Price:</strong> ${{ result.recommended_price|round(2) }}</p>
-            <p><strong>Market Insights:</strong> {{ result.insights }}</p>
+        <div class="result fade-in">
+            <h2>Dynamic Pricing Results</h2>
+            
+            <!-- Recommended Price Card -->
+            <div class="price-card">
+                <h3>Recommended Price</h3>
+                <div class="price-info">
+                    <p><strong>Price:</strong> ${{ result.price_response.recommended_price|round(2) }}</p>
+                    {% if result.price_response.price_adjustment is defined %}
+                    <p><strong>Adjustment:</strong> {{ (result.price_response.price_adjustment * 100)|round(2) }}%</p>
+                    {% else %}
+                    <p><strong>Adjustment:</strong> Not available</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Features Table -->
+            <div class="features-table">
+                <h3>Product Features</h3>
+                <table>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Value</th>
+                    </tr>
+                    <tr>
+                        <td>Price Gap</td>
+                        <td>${{ result.price_response.features.price_gap|round(2) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Normalized Price</td>
+                        <td>{{ result.price_response.features.normalized_price|round(3) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Demand Signal</td>
+                        <td>{{ result.price_response.features.demand_signal|round(3) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Price Trend</td>
+                        <td>{{ result.price_response.features.price_trend|round(2) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Product Score</td>
+                        <td>{{ result.price_response.features.product_score|round(1) }} / 5</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <!-- Market Insights -->
+            <div class="insights">
+                <h3>Market Insights</h3>
+                <p>{{ result.insights|replace("\n", "<br>")|safe }}</p>
+            </div>
         </div>
         {% endif %}
         
         {% if error %}
-        <div class="error">
+        <div class="error fade-in">
             <p>Error: {{ error }}</p>
         </div>
         {% endif %}
     </div>
+
+    <script>
+        // Add loading spinner on form submission
+        document.getElementById('pricing-form').addEventListener('submit', function() {
+            const btn = document.getElementById('submit-btn');
+            const btnText = btn.querySelector('.btn-text');
+            const spinner = btn.querySelector('.spinner');
+            btnText.classList.add('hidden');
+            spinner.classList.remove('hidden');
+            btn.disabled = true;
+        });
+    </script>
 </body>
 </html>

@@ -37,11 +37,12 @@ def index():
                 json=data
             ).json()
             
+            # Pass full response data to the template
             return render_template(
                 "index.html",
                 result={
-                    "recommended_price": price_response["recommended_price"],
-                    "insights": insights_response["insights"]
+                    "price_response": price_response,  # Full price response
+                    "insights": insights_response["insights"]  # Insights text
                 }
             )
         except Exception as e:
