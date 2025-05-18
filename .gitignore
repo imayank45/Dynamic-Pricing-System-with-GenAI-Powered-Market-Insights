@@ -181,3 +181,7 @@ config/
 config\config.yaml
 C:\ds_projects\Dynamic-Pricing-System-with-GenAI-Powered-Market-Insights\config
 
+
+kubernetes/
+kubernetes/deployment.yaml
+.kubernetes
