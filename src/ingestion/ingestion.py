@@ -1,75 +1,55 @@
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from peft import LoraConfig, get_peft_model
+import logging
+from pyspark.sql import SparkSession
 import yaml
-from src.utils.logger import setup_logger
 import os
-from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("DynamicPricing")
 
-def fine_tune_genai(config_path: str) -> None:
-    """Fine-tune model for market insights."""
-    logger = setup_logger(config_path)
-    logger.info("Starting GenAI fine-tuning")
-    
-    with open(config_path, "r") as file:
+def get_spark_session():
+    connection_string = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+    if not connection_string:
+        raise ValueError("AZURE_STORAGE_CONNECTION_STRING environment variable not set")
+
+    spark = (SparkSession.builder
+             .appName("RetailIngestion")
+             # Explicitly set all Hadoop dependencies to 3.3.6
+             .config("spark.jars.packages", "io.delta:delta-spark_2.12:3.1.0,org.apache.hadoop:hadoop-azure:3.3.6,org.apache.hadoop:hadoop-common:3.3.6,org.apache.hadoop:hadoop-client:3.3.6")
+             .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension")
+             .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog")
+             .config("spark.hadoop.fs.azure.account.key.retaildynamic.blob.core.windows.net", 
+                     connection_string.split("AccountKey=")[1].split(";")[0])
+             .getOrCreate())
+    return spark
+
+def ingest_data(config_path):
+    with open(config_path, 'r') as file:
         config = yaml.safe_load(file)
     
-    # Get Hugging Face token from environment variable
-    hf_token = os.getenv("HUGGINGFACE_TOKEN")
-    if not hf_token:
-        logger.warning("HUGGINGFACE_TOKEN not found in .env. Attempting to proceed without token (may fail for gated models).")
+    data_path = config['data']['path']
+    delta_path = config['spark']['delta_table']
+    selected_columns = config['data']['selected_columns']
+    
+    logger.info(f"Reading data from {data_path}")
+    spark = get_spark_session()
     
     try:
-        # Load model and tokenizer with token if provided, on CPU
-        logger.info(f"Loading model {config['genai']['model_name']} on CPU")
-        model = AutoModelForCausalLM.from_pretrained(
-            config["genai"]["model_name"],
-            token=hf_token if hf_token else None,
-            device_map="cpu"  # Explicitly load on CPU
-        )
-        logger.info("Model loaded successfully")
+        data = spark.read.csv(data_path, header=True, inferSchema=True)
+        data = data.select(selected_columns)
+        logger.info(f"Writing to Delta table: {delta_path}")
+        data.write.format("delta").mode("overwrite").save(delta_path)
+        logger.info("Data ingestion completed successfully")
         
-        logger.info("Loading tokenizer")
-        tokenizer = AutoTokenizer.from_pretrained(
-            config["genai"]["model_name"],
-            token=hf_token if hf_token else None
-        )
-        logger.info("Tokenizer loaded successfully")
-        
-        logger.info("Applying LoRA configuration")
-        # Set target modules based on the model architecture
-        model_name = config["genai"]["model_name"].lower()
-        if "gpt2" in model_name:
-            target_modules = ["c_attn"]  # GPT-2 uses c_attn for attention projections
-        elif "opt" in model_name:
-            target_modules = ["q_proj", "v_proj"]  # OPT models use q_proj, v_proj
-        else:
-            target_modules = ["q", "v"]  # Default for Mistral-like models
-        
-        lora_config = LoraConfig(
-            r=config["genai"]["lora_r"],
-            lora_alpha=config["genai"]["lora_alpha"],
-            target_modules=target_modules
-        )
-        model = get_peft_model(model, lora_config)
-        logger.info("LoRA configuration applied successfully")
-        
-        # Placeholder: Add fine-tuning logic
-        logger.info("GenAI fine-tuning completed successfully")
-    
+        # Preview the ingested data
+        delta_data = spark.read.format("delta").load(delta_path)
+        logger.info("Preview of ingested data:")
+        delta_data.show()
     except Exception as e:
-        logger.error(f"Fine-tuning failed: {str(e)}")
+        logger.error(f"Ingestion failed: {str(e)}")
         raise
-
-def generate_insights(data: dict, config_path: str) -> str:
-    """Generate market insights."""
-    logger = setup_logger(config_path)
-    logger.info(f"Generating insights for product: {data['product_id']}")
-    
-    # Placeholder: Use fine-tuned model
-    return f"Adjust price due to high demand in {data['product_category_name']}."
+    finally:
+        spark.stop()
 
 if __name__ == "__main__":
-    fine_tune_genai("config/config.yaml")
+    ingest_data("config/config.yaml")
