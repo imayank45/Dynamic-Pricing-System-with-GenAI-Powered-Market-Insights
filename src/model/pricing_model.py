@@ -1,3 +1,7 @@
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
 import numpy as np
 import gymnasium as gym  # Use gymnasium instead of gym
 from gymnasium.spaces import Box  # Use gymnasium.spaces
