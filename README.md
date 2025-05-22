@@ -46,6 +46,8 @@ The architecture is modular with well-separated pipelines for ingestion, process
 
 ## 📂 Project Structure
 
+Note: Few files have been added to .gitignore in order to hide connection_strings and other secure tokens
+
 ```plaintext
 dynamic_pricing/
 ├── config/
