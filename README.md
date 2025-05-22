@@ -209,7 +209,7 @@ python run.py
 
 ---
 
-## 🌈 Why This Project Stands Out
+## 👽 Why This Project Stands Out
 
 * **Advanced AI**: PPO + GPT-4
 * **Scalable Architecture**: Microservices, modular
