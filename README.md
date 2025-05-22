@@ -40,7 +40,7 @@ The architecture is modular with well-separated pipelines for ingestion, process
 | DevOps           | Docker 🐳, Kubernetes, Azure CLI                          |
 | Monitoring       | Python logging, Azure Monitor                             |
 | Testing          | Pytest                                                    |
-| Others           | YAML, Git, GitHub, Prometheus                             |
+| Others           | YAML, Git, GitHub                                         |
 
 ---
 
