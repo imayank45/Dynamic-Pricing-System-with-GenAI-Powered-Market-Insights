@@ -224,4 +224,4 @@ python run.py
 * Real-time data ingestion via APIs
 * Fine-tune GPT-4 with large corpora
 * Add authentication to dashboard
-* Add Prometheus + Grafana for metrics
+
