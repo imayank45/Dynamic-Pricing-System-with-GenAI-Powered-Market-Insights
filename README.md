@@ -17,7 +17,7 @@ The architecture is modular with well-separated pipelines for ingestion, process
 
 ---
 
-## 🎯 Objectives
+## 🎯 Objectives 
 
 * **Optimize Pricing**: Use PPO to maximize profit based on real-world signals
 * **Generate Insights**: Leverage GPT-4 to provide human-readable pricing recommendations
