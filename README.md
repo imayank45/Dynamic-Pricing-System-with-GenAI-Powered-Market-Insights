@@ -15,7 +15,7 @@ This project creates a real-time pricing engine that dynamically adjusts product
 
 The architecture is modular with well-separated pipelines for ingestion, processing, modeling, insight generation, API service, and frontend.
 
----
+--- 
 
 ## 🎯 Objectives 
 
