@@ -2,7 +2,7 @@
 
 Welcome to the **Dynamic Pricing System**, a cutting-edge solution that optimizes product prices in real-time using advanced Reinforcement Learning (PPO) and generates actionable market insights with GPT-4. Deployed on Azure, this project showcases a scalable, modular, and production-ready system designed to maximize revenue for retail businesses.
 
----
+--- 
 
 ## 🌟 Project Overview
 
