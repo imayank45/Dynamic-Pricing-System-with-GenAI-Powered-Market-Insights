@@ -4,7 +4,7 @@ Welcome to the **Dynamic Pricing System**, a cutting-edge solution that optimize
 
 --- 
 
-## 🌟 Project Overview
+## 🌟 Project Overview 
 
 This project creates a real-time pricing engine that dynamically adjusts product prices based on demand, competitor prices, and market trends. It integrates:
  
